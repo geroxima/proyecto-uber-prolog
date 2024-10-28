@@ -8,7 +8,7 @@ calle('Av. España',     'A5', 'A1', unico, 1, 1, 1).
 calle('Av. Brasil',     'A4', 'A1', unico, 1, 1, 1).
 calle('Av. Caballero',  'A2', 'A5', unico, 1, 1, 1).
 
-% Ruta base entre dos intersecciones, recursiva.
+% Ruta base entre dos intersecciones, recuirsiva.
 ruta(Origen, Destino, [Origen|Ruta], Distancia, Semaforos, TraficoTotal) :-
     (calle(_, Origen, Intermedio, Sentido, Distancia1, Semaforos1, Trafico1) ;
      calle(_, Intermedio, Origen, doble, Distancia1, Semaforos1, Trafico1)),
