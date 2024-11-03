@@ -1,19 +1,10 @@
-% ruta(Ubicacion1, Ubicacion2, Distancia, Tiempo).
-% Rutas originales
-ruta(a, b, 5, 10).
-ruta(a, c, 7, 15).
-ruta(b, d, 3, 7).
-ruta(c, d, 4, 10).
-ruta(c, e, 6, 12).
-ruta(d, e, 2, 5).
+:- set_prolog_flag(toplevel_print_options, [quoted(true), portray(true), max_depth(0), max_length(0)]).
+:- set_prolog_flag(answer_write_options, [max_depth(0)]).
 
-% % Rutas inversas
-% ruta(b, a, 5, 10).
-% ruta(c, a, 7, 15).
-% ruta(d, b, 3, 7).
-% ruta(d, c, 4, 10).
-% ruta(e, c, 6, 12).
-% ruta(e, d, 2, 5).
+:- consult('mapa.pl').
+
+% ruta(nodoA, nodoB, distancia, transitoDe0A6, transito de 7 a 12, transito de 13 a 18, transito de 19 a 00)
+
 
 
 % mi_mi_member(Elemento, Lista)
@@ -42,10 +33,10 @@ ruta_mas_corta(Inicio, Fin, Camino, Distancia, Tiempo) :-
 
 % min_distancia(ListaDeRutas, RutaMinima)
 min_distancia([Ruta], Ruta).
-min_distancia([(C1, D1, T1), (C2, D2, T2) | Rutas], MinRuta) :-
+min_distancia([(_, D1, _), (_, D2, _) | Rutas], MinRuta) :-
     D1 =< D2,
-    min_distancia([(C1, D1, T1) | Rutas], MinRuta).
-min_distancia([(C1, D1, T1), (C2, D2, T2) | Rutas], MinRuta) :-
+    min_distancia([(_, D1, _) | Rutas], MinRuta).
+min_distancia([(_, D1, _), (C2, D2, T2) | Rutas], MinRuta) :-
     D1 > D2,
     min_distancia([(C2, D2, T2) | Rutas], MinRuta).
 
