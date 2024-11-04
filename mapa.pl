@@ -1,12 +1,12 @@
 % ruta(inicio, fin, distancia, 00-6, 7-12, 13-18, 19-24).
 % Calles horizontales (de izquierda a derecha)
-calle(constitucion_nacional, [a0, b0, c0, d0, e0, f0, g0, h0, i0 , j0]).
-calle(veinticinco_de_mayo, [a1, b1, c1, d1, e1, f1, g1, h1, i1 , j1]).
-calle(villarica, [a2, b2, c2, d2, e2, f2, g2, h2, i2 , j2]).
-calle(tomas_romero_pereira, [a3, b3, c3, d3, e3, f3, g3, h3, i3 , j3]).
-calle(catorce_de_mayo, [a4, b4, c4, d4, e4, f4, g4, h4, i4, j4]).
-calle(cerro_cora, [a5, b5, c5, d5, e5, f5, g5, h5, i5, j5]).
-calle(monsennor_wissen, [a6, b6, c6, d6, e6, f6, g6, h6, i6, j6]).
+calle('Constitución Nacional', [a0, b0, c0, d0, e0, f0, g0, h0, i0 , j0]).
+calle('25 de mayo', [a1, b1, c1, d1, e1, f1, g1, h1, i1 , j1]).
+calle('Villarica', [a2, b2, c2, d2, e2, f2, g2, h2, i2 , j2]).
+calle('Tomás Romero Pereira', [a3, b3, c3, d3, e3, f3, g3, h3, i3 , j3]).
+calle('14 de mayo', [a4, b4, c4, d4, e4, f4, g4, h4, i4, j4]).
+calle('Cerro Corá', [a5, b5, c5, d5, e5, f5, g5, h5, i5, j5]).
+calle('Monseñor Wissen', [a6, b6, c6, d6, e6, f6, g6, h6, i6, j6]).
 
 
 ruta(a0, b0, 100, 1, 1, 1, 1).
