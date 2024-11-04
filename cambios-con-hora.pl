@@ -42,21 +42,54 @@ count_semaforos([Nodo|Resto], Cantidad) :-
 count_semaforos([Nodo|Resto], Cantidad) :-
     \+ semaforo(Nodo),         % Verifica que el nodo no es un semáforo
     count_semaforos(Resto, Cantidad).
+
+
+% street_crossed(Node, Street)
+street_crossed(Node, Street) :-
+    calle(Street, Nodes),
+    mi_member(Node, Nodes).
+
+% streets_crossed(Path, Streets)
+streets_crossed([], []).
+streets_crossed([Node|Rest], [Street|StreetsRest]) :-
+    street_crossed(Node, Street),
+    streets_crossed(Rest, StreetsRest).
+
 % Definir tarifa fija por kilómetro
 tarifa_por_km(10). 
 
+tarifa_base(8000).
+
 % Helper predicate to get the traffic level based on the hour
 traffic_level(Hora, T00_6, T7_12, T13_18, T19_24, Traffic) :-
-    (Hora >= 0, Hora < 7 -> Traffic = T00_6;
-     Hora >= 7, Hora < 13 -> Traffic = T7_12;
-     Hora >= 13, Hora < 19 -> Traffic = T13_18;
-     Hora >= 19, Hora < 24 -> Traffic = T19_24).
+    (Hora >= 0, Hora < 7), Traffic = T00_6.
+traffic_level(Hora, T00_6, T7_12, T13_18, T19_24, Traffic) :-
+    (Hora >= 7, Hora < 13), Traffic = T7_12.
+traffic_level(Hora, T00_6, T7_12, T13_18, T19_24, Traffic) :-
+    (Hora >= 13, Hora < 19), Traffic = T13_18.
+traffic_level(Hora, T00_6, T7_12, T13_18, T19_24, Traffic) :-
+    (Hora >= 19, Hora < 24), Traffic = T19_24.
 
 % camino(UbicacionInicial, UbicacionFinal, Hora, Camino, DistanciaTotal, TiempoTotal, SemaforosTotal, ListaSemaforos, Precio)
+% Predicado principal para calcular el camino y el precio
+
+% Predicado principal para calcular el camino y el precio
 camino(Inicio, Fin, Hora, [Inicio|Ruta], DistanciaTotal, TiempoTotal, SemaforosTotal, ListaSemaforos, Precio) :-
     camino_aux(Inicio, Fin, Hora, [Inicio], Ruta, 0, 0, 0, DistanciaTotal, TiempoTotal, SemaforosTotal, [], ListaSemaforos),
-    tarifa_por_km(Tarifa),
-    Precio is DistanciaTotal * TiempoTotal / Tarifa.
+    calcular_precio(DistanciaTotal, TiempoTotal, Precio).
+
+% Predicado auxiliar para calcular el precio en función de la distancia total
+calcular_precio(DistanciaTotal, _, Precio) :-
+    DistanciaTotal =< 1000,     % Si la distancia es de 1000 metros o menos
+    tarifa_base(Precio).
+
+calcular_precio(DistanciaTotal, TiempoTotal, Precio) :-
+    DistanciaTotal > 1000,      % Si la distancia es mayor a 1000 metros
+    tarifa_base(TarifaBase),
+    tarifa_por_km(TarifaPorKm),
+    DistanciaExtra is DistanciaTotal - 1000,            % Calcula el exceso de distancia
+    PrecioExtra is (DistanciaExtra * TiempoTotal) / TarifaPorKm, % Calcula el costo adicional
+    Precio is TarifaBase + PrecioExtra.                 % Suma la tarifa base con el costo adicional
 
 % camino_aux es una regla auxiliar que acumula la distancia, el tiempo y los semaforos
 camino_aux(Ubicacion, Ubicacion, _, _, [], Distancia, Tiempo, Semaforos, Distancia, Tiempo, Semaforos, ListaSemaforos, ListaSemaforos).
@@ -66,11 +99,11 @@ camino_aux(Inicio, Fin, Hora, Visitados, [Siguiente|Ruta], DistanciaAcum, Tiempo
     traffic_level(Hora, T00_6, T7_12, T13_18, T19_24, TiempoPaso),
     \+ mi_member(Siguiente, Visitados),  % Evita ciclos
     NuevaDistancia is DistanciaAcum + DistanciaPaso,
-    NuevaDistancia =< 2000,  % Verifica si la distancia excede 2000
+    NuevaDistancia < 2000,  % Verifica si la distancia excede 2000
     % Caso cuando Siguiente es un semáforo
     semaforo(Siguiente),
     NuevoSemaforos is SemaforosAcum + 1,
-    append(ListaSemaforosAcum, [Siguiente], NuevaListaSemaforos),
+    concatenar(ListaSemaforosAcum, [Siguiente], NuevaListaSemaforos),
     TiempoExtra is 1,
     NuevoTiempo is TiempoAcum + TiempoPaso + TiempoExtra,
     camino_aux(Siguiente, Fin, Hora, [Siguiente|Visitados], Ruta, NuevaDistancia, NuevoTiempo, NuevoSemaforos, DistanciaTotal, TiempoTotal, SemaforosTotal, NuevaListaSemaforos, ListaSemaforos).
@@ -80,7 +113,7 @@ camino_aux(Inicio, Fin, Hora, Visitados, [Siguiente|Ruta], DistanciaAcum, Tiempo
     traffic_level(Hora, T00_6, T7_12, T13_18, T19_24, TiempoPaso),
     \+ mi_member(Siguiente, Visitados),  % Evita ciclos
     NuevaDistancia is DistanciaAcum + DistanciaPaso,
-    NuevaDistancia =< 2000,  % Verifica si la distancia excede 2000
+    NuevaDistancia < 2000,  % Verifica si la distancia excede 2000
     % Caso cuando Siguiente no es un semáforo
     \+ semaforo(Siguiente),
     NuevoSemaforos is SemaforosAcum,
@@ -118,7 +151,7 @@ imprimir_rutas([]).
 imprimir_rutas([(Camino, Distancia, Tiempo, Semaforos, ListaSemaforos, Precio) | Rutas]) :-
     format('------------~n'),
     format('Camino: ~w~n', [Camino]),
-    format('Distancia: ~w~n', [Distancia]),
+    format('Distancia: ~w metros~n', [Distancia]),
     format('Tiempo: ~w~n', [Tiempo]),
     format('Semaforos: ~w~n', [Semaforos]),
     format('Intersecciones con semaforos: ~w~n', [ListaSemaforos]),
@@ -129,10 +162,10 @@ imprimir_rutas([(Camino, Distancia, Tiempo, Semaforos, ListaSemaforos, Precio) |
 viaje(Inicio, Fin, Hora, MejoresRutas) :-
     bagof((C, D, T, S, L, P), camino(Inicio, Fin, Hora, C, D, T, S, L, P), Rutas),
     sort(2, @=<, Rutas, RutasOrdenadas),  % Ordenar rutas por distancia
-    sublist(RutasOrdenadas, MejoresRutas, 0, 3).  % Seleccionar las tres primeras rutas
+    sublist(RutasOrdenadas, MejoresRutas, 0, 5).  % Seleccionar las tres primeras rutas
 
 % viaje_imprimir(UbicacionInicial, UbicacionFinal, Hora)
-viaje_imprimir(Inicio, Fin, Hora) :-
+viajar(Inicio, Fin, Hora) :-
     format('Rutas desde ~w hasta ~w a las ~w hs~n', [Inicio, Fin, Hora]),
     viaje(Inicio, Fin, Hora, MejoresRutas),
     imprimir_rutas(MejoresRutas).
