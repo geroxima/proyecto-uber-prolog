@@ -43,17 +43,11 @@ count_semaforos([Nodo|Resto], Cantidad) :-
     \+ semaforo(Nodo),         % Verifica que el nodo no es un semáforo
     count_semaforos(Resto, Cantidad).
 
+% Obtener la ubicación correspondiente a un nombre de lugar
+obtener_ubicacion(Nombre, Ubicacion) :-
+    lugar(Nombre, Ubicacion), !.
+obtener_ubicacion(Ubicacion, Ubicacion).
 
-% street_crossed(Node, Street)
-street_crossed(Node, Street) :-
-    calle(Street, Nodes),
-    mi_member(Node, Nodes).
-
-% streets_crossed(Path, Streets)
-streets_crossed([], []).
-streets_crossed([Node|Rest], [Street|StreetsRest]) :-
-    street_crossed(Node, Street),
-    streets_crossed(Rest, StreetsRest).
 
 % Definir tarifa fija por kilómetro
 tarifa_por_km(10). 
@@ -150,22 +144,24 @@ min_semaforos([(_, _, _, S1, _, _), (C2, D2, T2, S2, L2, P2) | Rutas], MinRuta) 
 imprimir_rutas([]).
 imprimir_rutas([(Camino, Distancia, Tiempo, Semaforos, ListaSemaforos, Precio) | Rutas]) :-
     format('------------~n'),
-    format('Camino: ~w~n', [Camino]),
-    format('Distancia: ~w metros~n', [Distancia]),
-    format('Tiempo: ~w~n', [Tiempo]),
-    format('Semaforos: ~w~n', [Semaforos]),
-    format('Intersecciones con semaforos: ~w~n', [ListaSemaforos]),
-    format('Precio: ~2f Gs~n', [Precio]),
+    format('🏁 Camino: ~w~n', [Camino]),
+    format('📏 Distancia: ~w metros~n', [Distancia]),
+    format('⏳ Tiempo: ~w~n', [Tiempo]),
+    format('🚦 Semaforos: ~w~n', [Semaforos]),
+    format('🚧 Intersecciones con semaforos: ~w~n', [ListaSemaforos]),
+    format('💸 Precio: ~2f Gs~n', [Precio]),
     imprimir_rutas(Rutas).
 
 % viaje(UbicacionInicial, UbicacionFinal, Hora, MejoresRutas)
 viaje(Inicio, Fin, Hora, MejoresRutas) :-
     bagof((C, D, T, S, L, P), camino(Inicio, Fin, Hora, C, D, T, S, L, P), Rutas),
     sort(2, @=<, Rutas, RutasOrdenadas),  % Ordenar rutas por distancia
-    sublist(RutasOrdenadas, MejoresRutas, 0, 5).  % Seleccionar las tres primeras rutas
+    sublist(RutasOrdenadas, MejoresRutas, 0, 3).  % Seleccionar las tres primeras rutas
 
-% viaje_imprimir(UbicacionInicial, UbicacionFinal, Hora)
+% Modificar el predicado viajar/3 para aceptar nombres de lugares
 viajar(Inicio, Fin, Hora) :-
+    obtener_ubicacion(Inicio, UbicacionInicio),
+    obtener_ubicacion(Fin, UbicacionFin),
     format('Rutas desde ~w hasta ~w a las ~w hs~n', [Inicio, Fin, Hora]),
-    viaje(Inicio, Fin, Hora, MejoresRutas),
+    viaje(UbicacionInicio, UbicacionFin, Hora, MejoresRutas),
     imprimir_rutas(MejoresRutas).
